@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Protocol X | لعبة الألغاز التحدي</title>
+<title>Protocol X | لعبة الألغاز التحدي - النسخة السرية</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 * {
@@ -26,6 +26,107 @@ canvas {
   top: 0;
   left: 0;
   z-index: -1;
+}
+
+/* شاشة الدخول */
+.login-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 10, 20, 0.98);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(15px);
+}
+
+.login-container {
+  background: rgba(10, 25, 40, 0.95);
+  padding: 60px 40px;
+  border-radius: 25px;
+  box-shadow: 0 0 50px rgba(0, 255, 204, 0.5);
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  border: 2px solid #00ffcc;
+  animation: fadeIn 1s;
+}
+
+.login-container h1 {
+  margin-bottom: 20px;
+  color: #00ffcc;
+  font-size: 2.5rem;
+  text-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+}
+
+.login-container p {
+  margin-bottom: 30px;
+  color: #aaffee;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.password-input {
+  position: relative;
+  margin: 30px 0;
+}
+
+#password {
+  width: 100%;
+  padding: 18px 20px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #00ffcc;
+  border-radius: 15px;
+  color: #00ffcc;
+  font-size: 1.2rem;
+  text-align: center;
+  letter-spacing: 3px;
+  direction: ltr;
+  transition: all 0.3s;
+}
+
+#password:focus {
+  outline: none;
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.7);
+  border-color: #66ffd9;
+}
+
+.password-hint {
+  color: #66ccff;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+.error-message {
+  color: #ff6666;
+  margin-top: 15px;
+  min-height: 25px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.login-btn {
+  background: linear-gradient(135deg, #00ffcc, #00997a);
+  color: #001a14;
+  border: none;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, #00ffaa, #008066);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.7);
 }
 
 /* تصميم الهيدر */
@@ -108,7 +209,7 @@ canvas {
   height: 100%;
   background: linear-gradient(90deg, #00ffcc, #00b386);
   border-radius: 6px;
-  width: 5%;
+  width: 2%;
   transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -338,6 +439,12 @@ footer {
   transform: translateY(0);
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
 /* تصميم متجاوب */
 @media (max-width: 768px) {
   .header {
@@ -373,6 +480,10 @@ footer {
   #question {
     font-size: 1.3rem;
   }
+  
+  .login-container {
+    padding: 40px 25px;
+  }
 }
 </style>
 </head>
@@ -380,8 +491,33 @@ footer {
 
 <canvas id="matrix"></canvas>
 
+<!-- شاشة الدخول بكلمة السر -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-container">
+    <h1><i class="fas fa-user-secret"></i> Protocol X</h1>
+    <p>لعبة الألغاز السرية - النسخة المحمية</p>
+    <p style="color: #ffcc00; font-size: 0.9rem;">⚠ هذه النسخة تتطلب كلمة سر خاصة للوصول</p>
+    
+    <div class="password-input">
+      <input type="password" id="password" placeholder="أدخل كلمة السر للدخول" autocomplete="off">
+      <div class="password-hint">كلمة السر مكونة من 6 أحرف (أحرف صغيرة)</div>
+    </div>
+    
+    <div class="error-message" id="errorMsg"></div>
+    
+    <button class="login-btn" onclick="checkPassword()">
+      <i class="fas fa-unlock"></i>
+      فتح اللعبة
+    </button>
+    
+    <div style="margin-top: 30px; color: #66ccff; font-size: 0.85rem;">
+      <i class="fas fa-info-circle"></i> تحتوي هذه النسخة على 50 لغزًا تحديًا
+    </div>
+  </div>
+</div>
+
 <!-- الهيدر المحسن -->
-<div class="header">
+<div class="header" style="display: none;" id="gameHeader">
   <div class="logo">
     <i class="fas fa-user-secret"></i>
     <span>Protocol X</span>
@@ -398,13 +534,13 @@ footer {
     </div>
     <div class="stat">
       <i class="fas fa-layer-group"></i>
-      <span>المرحلة: <span id="stageNum">1</span>/30</span>
+      <span>المرحلة: <span id="stageNum">1</span>/50</span>
     </div>
   </div>
 </div>
 
 <!-- شريط التقدم -->
-<div class="container">
+<div class="container" style="display: none;" id="gameContainer">
   <div class="progress-container">
     <div>تقدم اللعبة</div>
     <div class="progress-bar">
@@ -422,7 +558,7 @@ footer {
       </div>
     </div>
     
-    <p id="question">5 × 6 ؟</p>
+    <p id="question">جاري تحميل اللغز...</p>
     
     <div class="input-container">
       <input type="text" id="answer" placeholder="اكتب الحل هنا ثم اضغط Enter" autocomplete="off">
@@ -435,7 +571,7 @@ footer {
       </button>
       <button id="hintBtn" onclick="showHint()">
         <i class="fas fa-question-circle"></i>
-        مساعدة
+        مساعدة (3/3)
       </button>
     </div>
   </div>
@@ -450,11 +586,12 @@ footer {
     <div style="margin: 30px 0;">
       <h3><i class="fas fa-star"></i> النقاط النهائية: <span id="finalScore">0</span></h3>
       <h3><i class="fas fa-clock"></i> الوقت الإجمالي: <span id="finalTime">0</span> ثانية</h3>
+      <h3><i class="fas fa-brain"></i> نسبة النجاح: <span id="successRate">0</span>%</h3>
     </div>
     
     <div class="win-code">
-      <div>كود الفوز:</div>
-      <div style="font-weight: bold; color: #00ffcc;">ISLAM-X-ELITE-777</div>
+      <div>كود الفوز الخاص بك:</div>
+      <div style="font-weight: bold; color: #00ffcc; font-size: 1.5rem;">HACKER-ELITE-50</div>
     </div>
     
     <button class="restart-btn" onclick="restartGame()">
@@ -465,8 +602,8 @@ footer {
 </div>
 
 <!-- الفوتر -->
-<footer>
-  <span>بواسطة إسلام</span>
+<footer id="gameFooter" style="display: none;">
+  <span>بواسطة إسلام | النسخة السرية</span>
   <div class="social-icons">
     <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
     <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
@@ -475,47 +612,153 @@ footer {
 </footer>
 
 <script>
+// === كلمة السر ===
+const SECRET_PASSWORD = "matrix"; // كلمة السر
+
 // === بيانات اللعبة ===
 let currentStage = 0;
 let score = 0;
 let totalTime = 0;
 let stageTime = 0;
-let gameActive = true;
+let gameActive = false;
 let hintsUsed = 0;
+let totalHints = 3;
+let correctAnswers = 0;
 
-// === مصفوفة الألغاز ===
+// === مصفوفة الألغاز (50 لغز) ===
 const riddles = [
+  // المستوى 1-10: ألغاز سهلة
   {q:"5 × 6 ؟", a:"30", hint:"حاصل ضرب 5 في 6"},
-  {q:"فك التشفير: 56 49 43 54 4F 52 59", a:"victory", hint:"أحرف ست عشرية (Hex) إلى نصوص"},
-  {q:"عكس كلمة ليل؟", a:"نهار", hint:"الوقت الذي تشرق فيه الشمس"},
-  {q:"أملك مفاتيح بلا أبواب؟", a:"بيانو", hint:"آلة موسيقية"},
   {q:"100 ÷ 4 ؟", a:"25", hint:"قسمة 100 على 4"},
-  {q:"عاصمة فرنسا؟", a:"باريس", hint:"مدينة بها برج إيفل"},
   {q:"7 + 8 ؟", a:"15", hint:"مجموع 7 و 8"},
   {q:"مربع 9 ؟", a:"81", hint:"9 × 9"},
-  {q:"أنا أظهر ليلاً وأختفي نهاراً؟", a:"القمر", hint:"جرم سماوي"},
   {q:"12 × 2 ؟", a:"24", hint:"12 مضروب في 2"},
   {q:"نصف 50 ؟", a:"25", hint:"50 مقسوم على 2"},
+  {q:"8 × 8 ؟", a:"64", hint:"8 في 8"},
+  {q:"20 ÷ 5 ؟", a:"4", hint:"20 مقسوم على 5"},
+  {q:"3 × 9 ؟", a:"27", hint:"3 مضروب في 9"},
+  {q:"15 + 17 ؟", a:"32", hint:"مجموع 15 و 17"},
+  
+  // المستوى 11-20: ألغاز منطقية
+  {q:"عكس كلمة ليل؟", a:"نهار", hint:"الوقت الذي تشرق فيه الشمس"},
+  {q:"أملك مفاتيح بلا أبواب؟", a:"بيانو", hint:"آلة موسيقية"},
+  {q:"عاصمة فرنسا؟", a:"باريس", hint:"مدينة بها برج إيفل"},
+  {q:"أنا أظهر ليلاً وأختفي نهاراً؟", a:"القمر", hint:"جرم سماوي"},
   {q:"أول شهر بالسنة؟", a:"يناير", hint:"الشهر الأول في التقويم الميلادي"},
   {q:"كم عدد حروف AI؟", a:"2", hint:"AI = حرفين"},
   {q:"لون السماء الصافي؟", a:"ازرق", hint:"لون البحر الصافي"},
   {q:"اليوم بعد الاثنين؟", a:"الثلاثاء", hint:"ثاني أيام الأسبوع"},
   {q:"شيء تكتبه ولا تراه؟", a:"فكرة", hint:"شيء في العقل"},
-  {q:"8 × 8 ؟", a:"64", hint:"8 في 8"},
-  {q:"20 ÷ 5 ؟", a:"4", hint:"20 مقسوم على 5"},
-  {q:"3 × 9 ؟", a:"27", hint:"3 مضروب في 9"},
-  {q:"اكتب كلمة protocol", a:"protocol", hint:"كلمة إنجليزية تعني بروتوكول"},
+  {q:"شيء يكسوك وهو عارٍ؟", a:"الإبرة", hint:"تستخدم في الخياطة"},
+  
+  // المستوى 21-30: ألغاز تشفير
+  {q:"فك التشفير: 56 49 43 54 4F 52 59", a:"victory", hint:"أحرف ست عشرية (Hex) إلى نصوص"},
+  {q:"فك التشفير: 48 41 43 4B 45 52", a:"hacker", hint:"Hex إلى نص"},
+  {q:"ROT13: Xrl", a:"key", hint:"تحويل ROT13"},
+  {q:"الكود الثنائي: 01001101 01000001", a:"ma", hint:"تحويل binary إلى نص"},
+  {q:"Caesar Cipher (+3): Fdhvdu", a:"caesar", hint:"أحرف إنجليزية"},
+  {q:"Morse: .--. .-. ---", a:"pro", hint:"شفرة مورس"},
+  {q:"Base64: UHJvdG9jb2w=", a:"protocol", hint:"فك Base64"},
+  {q:"ASCII: 72 65 6C 6C 6F", a:"hello", hint:"أرقام ASCII"},
+  {q:"Reverse: xelA", a:"Alex", hint:"عكس الكلمة"},
+  {q:"Atbash: Zgyzhs", a:"atbash", hint:"شفرة Atbash"},
+  
+  // المستوى 31-40: ألغاز أنمي
   {q:"من هو شخصية 'ناروتو' التي أصبحت هوكاجي؟", a:"ناروتو أوزوماكي", hint:"الشخصية الرئيسية في الأنمي"},
   {q:"في أي حرب استخدمت الـ 'نينجا الحصار الكبير'؟", a:"الحرب الرابعة", hint:"الحرب الرابعة للنينجا"},
   {q:"'أنا سأصبح أعظم هُوكاجي!' من قال هذه؟", a:"ناروتو", hint:"الشخصية التي تحلم بأن تصبح هوكاجي"},
-  {q:"اكتب اسم الـ Sharingan", a:"sharingan", hint:"عين الدمعة في ناروتو"},
-  {q:"ضع الأحداث بالترتيب: غزو كونوها، امتحان التشونين، حرب النينجا الرابعة", a:"امتحان التشونين، غزو كونوها، حرب النينجا الرابعة", hint:"الترتيب الزمني للأحداث"},
-  {q:"إذا كان ناروتو يقاتل 3 أعداء، وساسوكي يقاتل 2، كم عدد الخصوم مجتمعين؟", a:"5", hint:"3 + 2 = 5"},
-  {q:"من يستطيع استخدام الـ Rasengan؟", a:"ناروتو", hint:"تقنية الكرة الدوارة"},
-  {q:"ما كلمة السر لدخول أكاديمية النينجا في المرحلة 1 من الأنمي؟", a:"konoha", hint:"قرية الورق"},
-  {q:"اختر الشخصية التي لم تشارك في حرب النينجا الرابعة: ناروتو، ساسكي، كاكاشي، هيناتا؟", a:"هيناتا", hint:"شخصية أنثوية"},
-  {q:"كم عدد الأدميرالات في عالم الانمي 'ون بيس'؟", a:"3", hint:"عدد الأدميرالات في القوات البحرية"}
+  {q:"اكتب اسم الـ Sharingan بالإنجليزية", a:"sharingan", hint:"عين الدمعة في ناروتو"},
+  {q:"كم عدد الأدميرالات في عالم الانمي 'ون بيس'؟", a:"3", hint:"عدد الأدميرالات في القوات البحرية"},
+  {q:"من هو ملك القراصنة في ون بيس؟", a:"غول دي روجر", hint:"الملك السابق"},
+  {q:"ما اسم السفينة في ون بيس؟", a:"ميري", hint:"سفينة لوفي"},
+  {q:"من أنشأ الأكاديمية في هجوم العمالقة؟", a:"إيرين", hint:"المؤسس"},
+  {q:"كم عدد أطراف الأكتوبوش في أنمي 'دكتور ستون'؟", a:"8", hint:"مخلوق بحري"},
+  {q:"ما هي القرية التي ينتمي إليها ناروتو؟", a:"كونوها", hint:"قرية الورق"},
+  
+  // المستوى 41-50: ألغاز صعبة
+  {q:"ما هو العدد التالي: 2, 4, 8, 16, ?", a:"32", hint:"مضاعفة الرقم السابق"},
+  {q:"ما هو الرقم المفقود: 1, 1, 2, 3, 5, 8, ?", a:"13", hint:"متتالية فيبوناتشي"},
+  {q:"حل المعادلة: 3x + 7 = 22", a:"5", hint:"x = ?"},
+  {q:"ما هو العدد الأولي بعد 20؟", a:"23", hint:"عدد أولي"},
+  {q:"كم عدد حواف المكعب؟", a:"12", hint:"شكل ثلاثي الأبعاد"},
+  {q:"ما هو جذر 144؟", a:"12", hint:"√144 = ?"},
+  {q:"5! (عاملي) = ?", a:"120", hint:"5 × 4 × 3 × 2 × 1"},
+  {q:"ما هو 2^8؟", a:"256", hint:"2 أس 8"},
+  {q:"حول 1010 الثنائي إلى عشري", a:"10", hint:"Binary إلى Decimal"},
+  {q:"ما هو العدد الذي إذا ضرب في نفسه يعطي 625؟", a:"25", hint:"√625 = ?"}
 ];
+
+// === التحقق من كلمة السر ===
+function checkPassword() {
+  const passwordInput = document.getElementById("password").value.trim().toLowerCase();
+  const errorMsg = document.getElementById("errorMsg");
+  
+  if (passwordInput === SECRET_PASSWORD) {
+    // دخول ناجح
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("gameHeader").style.display = "flex";
+    document.getElementById("gameContainer").style.display = "block";
+    document.getElementById("gameFooter").style.display = "flex";
+    
+    gameActive = true;
+    loadStage();
+    startTimer();
+    createParticles(50);
+    
+    // تأثير صوتي (افتراضي)
+    playSound("success");
+  } else {
+    // دخول فاشل
+    errorMsg.innerHTML = "❌ كلمة سر خاطئة! حاول مرة أخرى.";
+    document.getElementById("password").style.borderColor = "#ff3300";
+    document.getElementById("password").style.animation = "shake 0.5s";
+    
+    // مسح الحقل
+    document.getElementById("password").value = "";
+    
+    setTimeout(() => {
+      document.getElementById("password").style.animation = "";
+      document.getElementById("password").style.borderColor = "#00ffcc";
+      errorMsg.innerHTML = "";
+    }, 2000);
+    
+    playSound("error");
+  }
+}
+
+// === تشغيل الأصوات (افتراضي) ===
+function playSound(type) {
+  // هذا للتوضيح فقط - في تطبيق حقيقي ستضيف ملفات صوتية
+  if (type === "success") {
+    // صوت نجاح
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    } catch (e) {
+      console.log("Audio not supported");
+    }
+  }
+}
+
+// === السماح بالدخول بالزر Enter ===
+document.getElementById("password").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    checkPassword();
+  }
+});
 
 // === تهيئة المرحلة ===
 function loadStage() {
@@ -527,12 +770,26 @@ function loadStage() {
   document.getElementById("answer").value = "";
   document.getElementById("hintText").innerText = "اكتب الإجابة في الحقل أدناه";
   
+  // تحديث عدد التلميحات المتبقية
+  document.getElementById("hintBtn").innerHTML = `<i class="fas fa-question-circle"></i> مساعدة (${totalHints - hintsUsed}/${totalHints})`;
+  
   // تحديث شريط التقدم
   const progressPercent = ((currentStage + 1) / riddles.length) * 100;
   document.getElementById("progressFill").style.width = `${progressPercent}%`;
   
   stageTime = 0;
   document.getElementById("answer").focus();
+}
+
+// === بدء المؤقت ===
+function startTimer() {
+  setInterval(() => {
+    if (gameActive) {
+      totalTime++;
+      stageTime++;
+      document.getElementById("timer").innerText = totalTime;
+    }
+  }, 1000);
 }
 
 // === التحقق من الإجابة ===
@@ -544,12 +801,16 @@ function checkAnswer() {
   
   if (userAnswer === correctAnswer) {
     // حساب النقاط بناء على الوقت المسجل
-    const timeBonus = Math.max(10 - Math.floor(stageTime / 10), 1);
+    const timeBonus = Math.max(15 - Math.floor(stageTime / 5), 5);
     score += 10 + timeBonus;
+    correctAnswers++;
     
     // تأثير بصري للإجابة الصحيحة
     document.getElementById("box").style.boxShadow = "0 0 40px rgba(0, 255, 100, 0.7)";
     document.getElementById("box").style.borderColor = "#00ff66";
+    
+    // جسيمات نجاح
+    createParticles(20);
     
     setTimeout(() => {
       document.getElementById("box").style.boxShadow = "0 0 30px rgba(0, 255, 204, 0.4)";
@@ -569,7 +830,7 @@ function checkAnswer() {
         document.getElementById("box").classList.remove("fade-out");
         document.getElementById("box").classList.add("fade-in");
         loadStage();
-        createParticles();
+        createParticles(10);
       }, 400);
     } else {
       finishGame();
@@ -587,8 +848,11 @@ function checkAnswer() {
     }, 500);
     
     // خصم نقطة للإجابة الخاطئة
-    score = Math.max(score - 2, 0);
+    score = Math.max(score - 3, 0);
     document.getElementById("score").innerText = score;
+    
+    // جسيمات خطأ
+    createErrorParticles();
     
     alert("❌ إجابة خاطئة! حاول مرة أخرى.");
   }
@@ -596,12 +860,15 @@ function checkAnswer() {
 
 // === عرض تلميح ===
 function showHint() {
-  if (hintsUsed < 3) {
+  if (hintsUsed < totalHints) {
     document.getElementById("hintText").innerText = riddles[currentStage].hint;
     hintsUsed++;
     
-    // خصم نقطة عند استخدام تلميح
-    score = Math.max(score - 1, 0);
+    // تحديث زر التلميح
+    document.getElementById("hintBtn").innerHTML = `<i class="fas fa-question-circle"></i> مساعدة (${totalHints - hintsUsed}/${totalHints})`;
+    
+    // خصم نقاط عند استخدام تلميح
+    score = Math.max(score - 5, 0);
     document.getElementById("score").innerText = score;
     
     // تأثير التلميح
@@ -609,6 +876,9 @@ function showHint() {
     setTimeout(() => {
       document.getElementById("hintBtn").style.background = "";
     }, 1000);
+    
+    // جسيمات تلميح
+    createHintParticles();
   } else {
     alert("لقد استخدمت جميع التلميحات المتاحة!");
   }
@@ -619,10 +889,16 @@ function finishGame() {
   gameActive = false;
   document.getElementById("finalScore").innerText = score;
   document.getElementById("finalTime").innerText = totalTime;
+  
+  // حساب نسبة النجاح
+  const successRate = Math.round((correctAnswers / riddles.length) * 100);
+  document.getElementById("successRate").innerText = successRate;
+  
   document.getElementById("endScreen").style.display = "flex";
   
   // تأثيرات النصر
   createConfetti();
+  playSound("success");
 }
 
 // === إعادة تشغيل اللعبة ===
@@ -631,6 +907,7 @@ function restartGame() {
   score = 0;
   totalTime = 0;
   hintsUsed = 0;
+  correctAnswers = 0;
   gameActive = true;
   
   document.getElementById("score").innerText = score;
@@ -638,14 +915,15 @@ function restartGame() {
   document.getElementById("endScreen").style.display = "none";
   
   loadStage();
+  createParticles(30);
 }
 
 // === تأثيرات الجسيمات ===
-function createParticles() {
+function createParticles(count) {
   const box = document.getElementById("box");
   const rect = box.getBoundingClientRect();
   
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < count; i++) {
     const particle = document.createElement("div");
     particle.classList.add("particle");
     
@@ -689,11 +967,95 @@ function createParticles() {
   }
 }
 
+// === جسيمات الخطأ ===
+function createErrorParticles() {
+  const box = document.getElementById("box");
+  const rect = box.getBoundingClientRect();
+  
+  for (let i = 0; i < 15; i++) {
+    const particle = document.createElement("div");
+    particle.classList.add("particle");
+    
+    particle.style.left = `${rect.left + rect.width / 2}px`;
+    particle.style.top = `${rect.top + rect.height / 2}px`;
+    particle.style.backgroundColor = `hsl(${Math.random() * 30}, 100%, 60%)`;
+    
+    document.body.appendChild(particle);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 4 + 3;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    
+    let posX = parseFloat(particle.style.left);
+    let posY = parseFloat(particle.style.top);
+    
+    const animate = () => {
+      posX += dx;
+      posY += dy;
+      particle.style.left = `${posX}px`;
+      particle.style.top = `${posY}px`;
+      
+      particle.style.opacity = parseFloat(particle.style.opacity || 1) - 0.03;
+      
+      if (parseFloat(particle.style.opacity || 1) > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        particle.remove();
+      }
+    };
+    
+    animate();
+  }
+}
+
+// === جسيمات التلميح ===
+function createHintParticles() {
+  const box = document.getElementById("box");
+  const rect = box.getBoundingClientRect();
+  
+  for (let i = 0; i < 10; i++) {
+    const particle = document.createElement("div");
+    particle.classList.add("particle");
+    
+    particle.style.left = `${rect.left + rect.width / 2}px`;
+    particle.style.top = `${rect.top + rect.height / 2}px`;
+    particle.style.backgroundColor = `hsl(${Math.random() * 60 + 200}, 100%, 60%)`;
+    
+    document.body.appendChild(particle);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 2 + 1;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    
+    let posX = parseFloat(particle.style.left);
+    let posY = parseFloat(particle.style.top);
+    
+    const animate = () => {
+      posX += dx;
+      posY += dy;
+      particle.style.left = `${posX}px`;
+      particle.style.top = `${posY}px`;
+      
+      particle.style.opacity = parseFloat(particle.style.opacity || 1) - 0.02;
+      
+      if (parseFloat(particle.style.opacity || 1) > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        particle.remove();
+      }
+    };
+    
+    animate();
+  }
+}
+
 // === تأثيرات الانتصار ===
 function createConfetti() {
-  const colors = ["#00ffcc", "#ff0066", "#00ff66", "#ffcc00", "#0099ff"];
+  const colors = ["#00ffcc", "#ff0066", "#00ff66", "#ffcc00", "#0099ff", "#cc00ff"];
   
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 150; i++) {
     const confetti = document.createElement("div");
     confetti.classList.add("particle");
     
@@ -707,10 +1069,12 @@ function createConfetti() {
     // شكل عشوائي (مربع أو دائرة)
     if (Math.random() > 0.5) {
       confetti.style.borderRadius = "50%";
+    } else {
+      confetti.style.borderRadius = "0";
     }
     
     // حجم عشوائي
-    const size = Math.random() * 10 + 5;
+    const size = Math.random() * 12 + 5;
     confetti.style.width = `${size}px`;
     confetti.style.height = `${size}px`;
     
@@ -720,7 +1084,7 @@ function createConfetti() {
     const angle = Math.random() * Math.PI * 2;
     const speed = Math.random() * 5 + 2;
     const dx = Math.cos(angle) * speed;
-    const dy = Math.sin(angle) * speed + 2; // سقوط للأسفل
+    const dy = Math.sin(angle) * speed + 2;
     
     let posX = parseFloat(confetti.style.left);
     let posY = parseFloat(confetti.style.top);
@@ -745,14 +1109,12 @@ function createConfetti() {
   }
 }
 
-// === عداد الوقت ===
-setInterval(() => {
-  if (gameActive) {
-    totalTime++;
-    stageTime++;
-    document.getElementById("timer").innerText = totalTime;
+// === السماح باستخدام زر Enter للإجابة ===
+document.getElementById("answer").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    checkAnswer();
   }
-}, 1000);
+});
 
 // === خلفية Matrix ===
 const canvas = document.getElementById("matrix");
@@ -797,15 +1159,8 @@ function init() {
   // تشغيل خلفية المصفوفة
   matrixEffect();
   
-  // تحميل المرحلة الأولى
-  loadStage();
-  
-  // السماح باستخدام زر Enter للإجابة
-  document.getElementById("answer").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      checkAnswer();
-    }
-  });
+  // التركيز على حقل كلمة السر
+  document.getElementById("password").focus();
 }
 
 // بدء اللعبة عند تحميل الصفحة
