@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocol X | لعبة الألغاز التحدي</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #0a0a14;
+  color: #00ffcc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+/* تصميم الهيدر */
+.header {
+  background: rgba(0, 20, 20, 0.85);
+  padding: 15px 20px;
+  border-bottom: 2px solid #00ffcc;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  backdrop-filter: blur(5px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00ffcc;
+}
+
+.logo i {
+  color: #00ffcc;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.stats-container {
+  display: flex;
+  gap: 25px;
+  font-size: 1.1rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 255, 204, 0.1);
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+}
+
+.stat i {
+  color: #00ffcc;
+}
+
+/* تصميم المحتوى الرئيسي */
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.progress-container {
+  margin: 30px 0;
+  background: rgba(0, 255, 204, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+}
+
+.progress-bar {
+  height: 12px;
+  background: rgba(0, 255, 204, 0.2);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffcc, #00b386);
+  border-radius: 6px;
+  width: 5%;
+  transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* تصميم صندوق اللغز */
+#box {
+  background: rgba(5, 15, 25, 0.85);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.4);
+  margin: 30px auto;
+  width: 100%;
+  max-width: 700px;
+  transition: transform 0.5s, opacity 0.5s;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+#box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 40px rgba(0, 255, 204, 0.5);
+}
+
+.stage-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+}
+
+#stageTitle {
+  font-size: 1.8rem;
+  color: #00ffcc;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+}
+
+.stage-hint {
+  color: #66ffd9;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#question {
+  font-size: 1.5rem;
+  margin: 25px 0;
+  line-height: 1.6;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-container {
+  margin: 30px 0;
+  position: relative;
+}
+
+#answer {
+  padding: 15px 20px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #00ffcc;
+  border: 2px solid #00ffcc;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+  direction: ltr;
+  text-align: center;
+}
+
+#answer:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+  border-color: #66ffd9;
+  background: rgba(0, 10, 10, 0.7);
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 25px;
+}
+
+button {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+}
+
+#checkBtn {
+  background: linear-gradient(135deg, #00ffcc, #00997a);
+  color: #001a14;
+}
+
+#checkBtn:hover {
+  background: linear-gradient(135deg, #00ffaa, #008066);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+}
+
+#hintBtn {
+  background: rgba(0, 150, 255, 0.2);
+  color: #66ccff;
+  border: 1px solid #0099ff;
+}
+
+#hintBtn:hover {
+  background: rgba(0, 150, 255, 0.4);
+  transform: scale(1.05);
+}
+
+/* تأثيرات الرسوميات */
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: #00ffcc;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* تصميم الفوتر */
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  padding: 15px;
+  background: rgba(0, 20, 20, 0.9);
+  border-top: 1px solid #00ffcc;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-left: 20px;
+}
+
+.social-icons a {
+  color: #66ffd9;
+  font-size: 1.2rem;
+  transition: all 0.3s;
+}
+
+.social-icons a:hover {
+  color: #00ffcc;
+  transform: translateY(-3px);
+}
+
+/* تصميم شاشة النهاية */
+.end-screen {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 10, 20, 0.95);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(10px);
+}
+
+.end-content {
+  background: rgba(10, 25, 40, 0.95);
+  padding: 50px;
+  border-radius: 25px;
+  box-shadow: 0 0 50px rgba(0, 255, 204, 0.5);
+  text-align: center;
+  max-width: 600px;
+  width: 90%;
+  border: 2px solid #00ffcc;
+  animation: fadeIn 0.8s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.win-code {
+  background: rgba(0, 255, 204, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  border: 1px dashed #00ffcc;
+}
+
+.restart-btn {
+  background: linear-gradient(135deg, #ff6600, #cc5200);
+  color: white;
+  margin-top: 20px;
+}
+
+.restart-btn:hover {
+  background: linear-gradient(135deg, #ff8533, #e65c00);
+}
+
+/* تأثيرات الحركة */
+.fade-out {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .stats-container {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .container {
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+  
+  #box {
+    padding: 25px;
+  }
+  
+  .buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  #question {
+    font-size: 1.3rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<!-- الهيدر المحسن -->
+<div class="header">
+  <div class="logo">
+    <i class="fas fa-user-secret"></i>
+    <span>Protocol X</span>
+  </div>
+  
+  <div class="stats-container">
+    <div class="stat">
+      <i class="fas fa-clock"></i>
+      <span>الوقت: <span id="timer">0</span> ثانية</span>
+    </div>
+    <div class="stat">
+      <i class="fas fa-star"></i>
+      <span>النقاط: <span id="score">0</span></span>
+    </div>
+    <div class="stat">
+      <i class="fas fa-layer-group"></i>
+      <span>المرحلة: <span id="stageNum">1</span>/30</span>
+    </div>
+  </div>
+</div>
+
+<!-- شريط التقدم -->
+<div class="container">
+  <div class="progress-container">
+    <div>تقدم اللعبة</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- صندوق اللغز -->
+  <div id="box" class="fade-in">
+    <div class="stage-info">
+      <h2 id="stageTitle">المرحلة 1</h2>
+      <div class="stage-hint">
+        <i class="fas fa-lightbulb"></i>
+        <span id="hintText">اكتب الإجابة في الحقل أدناه</span>
+      </div>
+    </div>
+    
+    <p id="question">5 × 6 ؟</p>
+    
+    <div class="input-container">
+      <input type="text" id="answer" placeholder="اكتب الحل هنا ثم اضغط Enter" autocomplete="off">
+    </div>
+    
+    <div class="buttons">
+      <button id="checkBtn" onclick="checkAnswer()">
+        <i class="fas fa-check-circle"></i>
+        تحقق من الإجابة
+      </button>
+      <button id="hintBtn" onclick="showHint()">
+        <i class="fas fa-question-circle"></i>
+        مساعدة
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- شاشة النهاية -->
+<div class="end-screen" id="endScreen">
+  <div class="end-content">
+    <h1><i class="fas fa-trophy"></i> تهانينا!</h1>
+    <p>لقد أكملت جميع مراحل Protocol X بنجاح!</p>
+    
+    <div style="margin: 30px 0;">
+      <h3><i class="fas fa-star"></i> النقاط النهائية: <span id="finalScore">0</span></h3>
+      <h3><i class="fas fa-clock"></i> الوقت الإجمالي: <span id="finalTime">0</span> ثانية</h3>
+    </div>
+    
+    <div class="win-code">
+      <div>كود الفوز:</div>
+      <div style="font-weight: bold; color: #00ffcc;">ISLAM-X-ELITE-777</div>
+    </div>
+    
+    <button class="restart-btn" onclick="restartGame()">
+      <i class="fas fa-redo"></i>
+      ابدأ لعبة جديدة
+    </button>
+  </div>
+</div>
+
+<!-- الفوتر -->
+<footer>
+  <span>بواسطة إسلام</span>
+  <div class="social-icons">
+    <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+    <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+    <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+  </div>
+</footer>
+
+<script>
+// === بيانات اللعبة ===
+let currentStage = 0;
+let score = 0;
+let totalTime = 0;
+let stageTime = 0;
+let gameActive = true;
+let hintsUsed = 0;
+
+// === مصفوفة الألغاز ===
+const riddles = [
+  {q:"5 × 6 ؟", a:"30", hint:"حاصل ضرب 5 في 6"},
+  {q:"فك التشفير: 56 49 43 54 4F 52 59", a:"victory", hint:"أحرف ست عشرية (Hex) إلى نصوص"},
+  {q:"عكس كلمة ليل؟", a:"نهار", hint:"الوقت الذي تشرق فيه الشمس"},
+  {q:"أملك مفاتيح بلا أبواب؟", a:"بيانو", hint:"آلة موسيقية"},
+  {q:"100 ÷ 4 ؟", a:"25", hint:"قسمة 100 على 4"},
+  {q:"عاصمة فرنسا؟", a:"باريس", hint:"مدينة بها برج إيفل"},
+  {q:"7 + 8 ؟", a:"15", hint:"مجموع 7 و 8"},
+  {q:"مربع 9 ؟", a:"81", hint:"9 × 9"},
+  {q:"أنا أظهر ليلاً وأختفي نهاراً؟", a:"القمر", hint:"جرم سماوي"},
+  {q:"12 × 2 ؟", a:"24", hint:"12 مضروب في 2"},
+  {q:"نصف 50 ؟", a:"25", hint:"50 مقسوم على 2"},
+  {q:"أول شهر بالسنة؟", a:"يناير", hint:"الشهر الأول في التقويم الميلادي"},
+  {q:"كم عدد حروف AI؟", a:"2", hint:"AI = حرفين"},
+  {q:"لون السماء الصافي؟", a:"ازرق", hint:"لون البحر الصافي"},
+  {q:"اليوم بعد الاثنين؟", a:"الثلاثاء", hint:"ثاني أيام الأسبوع"},
+  {q:"شيء تكتبه ولا تراه؟", a:"فكرة", hint:"شيء في العقل"},
+  {q:"8 × 8 ؟", a:"64", hint:"8 في 8"},
+  {q:"20 ÷ 5 ؟", a:"4", hint:"20 مقسوم على 5"},
+  {q:"3 × 9 ؟", a:"27", hint:"3 مضروب في 9"},
+  {q:"اكتب كلمة protocol", a:"protocol", hint:"كلمة إنجليزية تعني بروتوكول"},
+  {q:"من هو شخصية 'ناروتو' التي أصبحت هوكاجي؟", a:"ناروتو أوزوماكي", hint:"الشخصية الرئيسية في الأنمي"},
+  {q:"في أي حرب استخدمت الـ 'نينجا الحصار الكبير'؟", a:"الحرب الرابعة", hint:"الحرب الرابعة للنينجا"},
+  {q:"'أنا سأصبح أعظم هُوكاجي!' من قال هذه؟", a:"ناروتو", hint:"الشخصية التي تحلم بأن تصبح هوكاجي"},
+  {q:"اكتب اسم الـ Sharingan", a:"sharingan", hint:"عين الدمعة في ناروتو"},
+  {q:"ضع الأحداث بالترتيب: غزو كونوها، امتحان التشونين، حرب النينجا الرابعة", a:"امتحان التشونين، غزو كونوها، حرب النينجا الرابعة", hint:"الترتيب الزمني للأحداث"},
+  {q:"إذا كان ناروتو يقاتل 3 أعداء، وساسوكي يقاتل 2، كم عدد الخصوم مجتمعين؟", a:"5", hint:"3 + 2 = 5"},
+  {q:"من يستطيع استخدام الـ Rasengan؟", a:"ناروتو", hint:"تقنية الكرة الدوارة"},
+  {q:"ما كلمة السر لدخول أكاديمية النينجا في المرحلة 1 من الأنمي؟", a:"konoha", hint:"قرية الورق"},
+  {q:"اختر الشخصية التي لم تشارك في حرب النينجا الرابعة: ناروتو، ساسكي، كاكاشي، هيناتا؟", a:"هيناتا", hint:"شخصية أنثوية"},
+  {q:"كم عدد الأدميرالات في عالم الانمي 'ون بيس'؟", a:"3", hint:"عدد الأدميرالات في القوات البحرية"}
+];
+
+// === تهيئة المرحلة ===
+function loadStage() {
+  if (!gameActive) return;
+  
+  document.getElementById("stageTitle").innerText = `المرحلة ${currentStage + 1}`;
+  document.getElementById("stageNum").innerText = currentStage + 1;
+  document.getElementById("question").innerText = riddles[currentStage].q;
+  document.getElementById("answer").value = "";
+  document.getElementById("hintText").innerText = "اكتب الإجابة في الحقل أدناه";
+  
+  // تحديث شريط التقدم
+  const progressPercent = ((currentStage + 1) / riddles.length) * 100;
+  document.getElementById("progressFill").style.width = `${progressPercent}%`;
+  
+  stageTime = 0;
+  document.getElementById("answer").focus();
+}
+
+// === التحقق من الإجابة ===
+function checkAnswer() {
+  if (!gameActive) return;
+  
+  const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+  const correctAnswer = riddles[currentStage].a.toLowerCase();
+  
+  if (userAnswer === correctAnswer) {
+    // حساب النقاط بناء على الوقت المسجل
+    const timeBonus = Math.max(10 - Math.floor(stageTime / 10), 1);
+    score += 10 + timeBonus;
+    
+    // تأثير بصري للإجابة الصحيحة
+    document.getElementById("box").style.boxShadow = "0 0 40px rgba(0, 255, 100, 0.7)";
+    document.getElementById("box").style.borderColor = "#00ff66";
+    
+    setTimeout(() => {
+      document.getElementById("box").style.boxShadow = "0 0 30px rgba(0, 255, 204, 0.4)";
+      document.getElementById("box").style.borderColor = "rgba(0, 255, 204, 0.2)";
+    }, 500);
+    
+    // تحديث النقاط
+    document.getElementById("score").innerText = score;
+    
+    // الانتقال للمرحلة التالية
+    currentStage++;
+    
+    if (currentStage < riddles.length) {
+      // تأثير انتقال بين المراحل
+      document.getElementById("box").classList.add("fade-out");
+      setTimeout(() => {
+        document.getElementById("box").classList.remove("fade-out");
+        document.getElementById("box").classList.add("fade-in");
+        loadStage();
+        createParticles();
+      }, 400);
+    } else {
+      finishGame();
+    }
+  } else {
+    // تأثير للإجابة الخاطئة
+    document.getElementById("box").style.animation = "shake 0.5s";
+    document.getElementById("answer").style.borderColor = "#ff3300";
+    document.getElementById("answer").style.boxShadow = "0 0 10px rgba(255, 50, 0, 0.5)";
+    
+    setTimeout(() => {
+      document.getElementById("box").style.animation = "";
+      document.getElementById("answer").style.borderColor = "#00ffcc";
+      document.getElementById("answer").style.boxShadow = "";
+    }, 500);
+    
+    // خصم نقطة للإجابة الخاطئة
+    score = Math.max(score - 2, 0);
+    document.getElementById("score").innerText = score;
+    
+    alert("❌ إجابة خاطئة! حاول مرة أخرى.");
+  }
+}
+
+// === عرض تلميح ===
+function showHint() {
+  if (hintsUsed < 3) {
+    document.getElementById("hintText").innerText = riddles[currentStage].hint;
+    hintsUsed++;
+    
+    // خصم نقطة عند استخدام تلميح
+    score = Math.max(score - 1, 0);
+    document.getElementById("score").innerText = score;
+    
+    // تأثير التلميح
+    document.getElementById("hintBtn").style.background = "rgba(0, 100, 255, 0.4)";
+    setTimeout(() => {
+      document.getElementById("hintBtn").style.background = "";
+    }, 1000);
+  } else {
+    alert("لقد استخدمت جميع التلميحات المتاحة!");
+  }
+}
+
+// === انتهاء اللعبة ===
+function finishGame() {
+  gameActive = false;
+  document.getElementById("finalScore").innerText = score;
+  document.getElementById("finalTime").innerText = totalTime;
+  document.getElementById("endScreen").style.display = "flex";
+  
+  // تأثيرات النصر
+  createConfetti();
+}
+
+// === إعادة تشغيل اللعبة ===
+function restartGame() {
+  currentStage = 0;
+  score = 0;
+  totalTime = 0;
+  hintsUsed = 0;
+  gameActive = true;
+  
+  document.getElementById("score").innerText = score;
+  document.getElementById("timer").innerText = totalTime;
+  document.getElementById("endScreen").style.display = "none";
+  
+  loadStage();
+}
+
+// === تأثيرات الجسيمات ===
+function createParticles() {
+  const box = document.getElementById("box");
+  const rect = box.getBoundingClientRect();
+  
+  for (let i = 0; i < 15; i++) {
+    const particle = document.createElement("div");
+    particle.classList.add("particle");
+    
+    // وضع عشوائي حول الصندوق
+    particle.style.left = `${rect.left + Math.random() * rect.width}px`;
+    particle.style.top = `${rect.top + Math.random() * rect.height}px`;
+    
+    // حجم ولون عشوائي
+    const size = Math.random() * 6 + 2;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    particle.style.backgroundColor = `hsl(${Math.random() * 60 + 150}, 100%, 60%)`;
+    
+    document.body.appendChild(particle);
+    
+    // حركة الجسيم
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 3 + 2;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    
+    let posX = parseFloat(particle.style.left);
+    let posY = parseFloat(particle.style.top);
+    
+    const animate = () => {
+      posX += dx;
+      posY += dy;
+      particle.style.left = `${posX}px`;
+      particle.style.top = `${posY}px`;
+      
+      particle.style.opacity = parseFloat(particle.style.opacity || 1) - 0.02;
+      
+      if (parseFloat(particle.style.opacity || 1) > 0) {
+        requestAnimationFrame(animate);
+      } else {
+        particle.remove();
+      }
+    };
+    
+    animate();
+  }
+}
+
+// === تأثيرات الانتصار ===
+function createConfetti() {
+  const colors = ["#00ffcc", "#ff0066", "#00ff66", "#ffcc00", "#0099ff"];
+  
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement("div");
+    confetti.classList.add("particle");
+    
+    // وضع عشوائي
+    confetti.style.left = `${Math.random() * window.innerWidth}px`;
+    confetti.style.top = `${-10}px`;
+    
+    // لون عشوائي
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    // شكل عشوائي (مربع أو دائرة)
+    if (Math.random() > 0.5) {
+      confetti.style.borderRadius = "50%";
+    }
+    
+    // حجم عشوائي
+    const size = Math.random() * 10 + 5;
+    confetti.style.width = `${size}px`;
+    confetti.style.height = `${size}px`;
+    
+    document.body.appendChild(confetti);
+    
+    // حركة عشوائية
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 5 + 2;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed + 2; // سقوط للأسفل
+    
+    let posX = parseFloat(confetti.style.left);
+    let posY = parseFloat(confetti.style.top);
+    
+    const animateConfetti = () => {
+      posX += dx;
+      posY += dy;
+      confetti.style.left = `${posX}px`;
+      confetti.style.top = `${posY}px`;
+      
+      // تدوير
+      confetti.style.transform = `rotate(${posX + posY}deg)`;
+      
+      if (posY < window.innerHeight) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        confetti.remove();
+      }
+    };
+    
+    animateConfetti();
+  }
+}
+
+// === عداد الوقت ===
+setInterval(() => {
+  if (gameActive) {
+    totalTime++;
+    stageTime++;
+    document.getElementById("timer").innerText = totalTime;
+  }
+}, 1000);
+
+// === خلفية Matrix ===
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+let cols = Math.floor(width / 20);
+let ypos = Array(cols).fill(0);
+
+function matrixEffect() {
+  ctx.fillStyle = "rgba(10, 10, 20, 0.05)";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "#00ffcc";
+  ctx.font = "15px monospace";
+  
+  for (let i = 0; i < ypos.length; i++) {
+    let text = String.fromCharCode(0x30A0 + Math.random() * 96);
+    ctx.fillText(text, i * 20, ypos[i] * 20);
+    
+    if (ypos[i] * 20 > height && Math.random() > 0.975) {
+      ypos[i] = 0;
+    }
+    
+    ypos[i] += 0.5 + Math.random() * 0.5;
+  }
+  
+  requestAnimationFrame(matrixEffect);
+}
+
+// === تهيئة الصفحة ===
+function init() {
+  // ضبط حجم Canvas
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    cols = Math.floor(width / 20);
+    ypos = Array(cols).fill(0);
+  }
+  
+  window.addEventListener("resize", resizeCanvas);
+  
+  // تشغيل خلفية المصفوفة
+  matrixEffect();
+  
+  // تحميل المرحلة الأولى
+  loadStage();
+  
+  // السماح باستخدام زر Enter للإجابة
+  document.getElementById("answer").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      checkAnswer();
+    }
+  });
+}
+
+// بدء اللعبة عند تحميل الصفحة
+window.onload = init;
+</script>
+</body>
+</html>
